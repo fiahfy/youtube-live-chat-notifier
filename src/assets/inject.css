@@ -1,0 +1,15 @@
+yt-live-chat-header-renderer > #primary-content {
+  min-width: 0;
+}
+yt-live-chat-header-renderer > #primary-content > #view-selector > yt-sort-filter-sub-menu-renderer {
+  width: 100%;
+}
+yt-live-chat-header-renderer > .ylcn-menu-button.ylcn-active-menu-button > button > yt-icon {
+  color: #4387f1!important;
+}
+yt-live-chat-header-renderer > .ylcn-menu-button > button > yt-icon > svg {
+  pointer-events: none;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
