@@ -6,7 +6,7 @@
 
 ## Features
 
-- Filter chat messages by authority types.
+- Notify chat messages by authority types.
 
 ## Screenshot
 
