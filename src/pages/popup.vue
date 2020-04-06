@@ -5,28 +5,28 @@
         <div class="d-flex">
           <div>
             <v-switch
-              v-model="enableTypes"
+              v-model="enabledTypes"
               label="Guest"
               value="guest"
               dense
               class="mt-0"
             />
             <v-switch
-              v-model="enableTypes"
+              v-model="enabledTypes"
               label="Member"
               value="member"
               dense
               class="mt-0"
             />
             <v-switch
-              v-model="enableTypes"
+              v-model="enabledTypes"
               label="Moderator"
               value="moderator"
               dense
               class="mt-0"
             />
             <v-switch
-              v-model="enableTypes"
+              v-model="enabledTypes"
               label="Owner"
               value="owner"
               dense
@@ -48,12 +48,12 @@ import { settingsStore } from '~/store'
 
 @Component
 export default class Popup extends Vue {
-  get enableTypes() {
-    return settingsStore.enableTypes
+  get enabledTypes() {
+    return settingsStore.enabledTypes
   }
-  set enableTypes(value) {
-    settingsStore.setEnableTypes({
-      enableTypes: value,
+  set enabledTypes(value) {
+    settingsStore.setenabledTypes({
+      enabledTypes: value,
     })
   }
 
