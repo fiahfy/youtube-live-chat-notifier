@@ -10,7 +10,7 @@ export default class SettingsModule extends VuexModule {
   enabledTypes = initialState.enabledTypes
 
   @Mutation
-  setenabledTypes({ enabledTypes }: { enabledTypes: AuthorType[] }) {
+  setEnabledTypes({ enabledTypes }: { enabledTypes: AuthorType[] }) {
     this.enabledTypes = enabledTypes
   }
   @Mutation

@@ -52,7 +52,7 @@ export default class Popup extends Vue {
     return settingsStore.enabledTypes
   }
   set enabledTypes(value) {
-    settingsStore.setenabledTypes({
+    settingsStore.setEnabledTypes({
       enabledTypes: value,
     })
   }
