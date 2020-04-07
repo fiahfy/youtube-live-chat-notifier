@@ -119,9 +119,7 @@ const notify = async (element: HTMLElement) => {
 
   const htmlMessage = element.querySelector('#message')?.innerHTML ?? ''
   const message = htmlMessage
-    ?.replace(/<img [^>]*alt="([^"]+)" [^>]*>/g, (_match, p1) =>
-      p1.match(/:.*:/) ? '' : p1
-    )
+    ?.replace(/<img [^>]*alt="([^"]+)" [^>]*>/g, (_match, p1) => p1)
     .replace(/<[^>]*>/g, '')
   const author = element.querySelector('#author-name')?.textContent ?? ''
   const avatorImage = element.querySelector('#img') as HTMLImageElement | null
