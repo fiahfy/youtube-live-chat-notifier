@@ -27,7 +27,7 @@ const querySelectorAsync = (
   })
 }
 
-export const getImageSourceAsync = (
+const getImageSourceAsync = (
   img: HTMLImageElement,
   interval = 100,
   timeout = 1000
@@ -43,7 +43,7 @@ export const getImageSourceAsync = (
   })
 }
 
-function getDataUrl(img: HTMLImageElement) {
+const getDataUrlFromImg = (img: HTMLImageElement) => {
   const canvas = document.createElement('canvas')
   canvas.width = img.width
   canvas.height = img.height
@@ -54,7 +54,18 @@ function getDataUrl(img: HTMLImageElement) {
   }
   ctx.drawImage(img, 0, 0)
 
-  return canvas.toDataURL('image/png')
+  return canvas.toDataURL('image/jpeg')
+}
+
+const getDataUrl = (url: string) => {
+  return new Promise((resolve) => {
+    const img = new Image()
+    img.crossOrigin = 'anonymous'
+    img.src = url
+    img.onload = () => {
+      resolve(getDataUrlFromImg(img))
+    }
+  })
 }
 
 const updateMenuButton = () => {
@@ -107,6 +118,13 @@ const notify = async (element: HTMLElement) => {
     return
   }
 
+  const video = parent.document.querySelector(
+    'video.html5-main-video'
+  ) as HTMLVideoElement | null
+  if (!video || video.paused) {
+    return
+  }
+
   if (element.tagName.toLowerCase() !== 'yt-live-chat-text-message-renderer') {
     return
   }
@@ -126,14 +144,7 @@ const notify = async (element: HTMLElement) => {
   avatorImage && avatorImage.setAttribute('crossOrigin', 'anonymous')
   const avatarUrl =
     (avatorImage && (await getImageSourceAsync(avatorImage))) ?? ''
-  const url = await new Promise((resolve) => {
-    const img = new Image()
-    img.crossOrigin = 'anonymous'
-    img.src = avatarUrl
-    img.onload = () => {
-      resolve(getDataUrl(img))
-    }
-  })
+  const url = await getDataUrl(avatarUrl)
 
   browser.runtime.sendMessage({
     id: 'notifyMessage',
