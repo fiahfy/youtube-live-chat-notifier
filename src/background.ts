@@ -7,7 +7,7 @@ import inject from '~/assets/inject.css'
 
 let initialEnabled = true
 let enabledStates: { [tabId: number]: boolean } = {}
-let tabIds: { [notificationId: string]: number } = {}
+let tabUrls: { [notificationId: string]: string } = {}
 
 const getSettings = async () => {
   const store = await readyStore()
@@ -48,20 +48,20 @@ const menuButtonClicked = async (tabId: number) => {
   })
 }
 
-const notifyMessage = async (
-  tabId: number,
-  {
-    message,
-    author,
-    avatarUrl,
-  }: {
-    message: string
-    author: string
-    avatarUrl: string
-  }
-) => {
+const notifyMessage = async ({
+  message,
+  author,
+  avatarUrl,
+  tabUrl,
+}: {
+  message: string
+  author: string
+  avatarUrl: string
+  tabUrl: string
+}) => {
   const id = nanoid()
-  tabIds = { ...tabIds, [id]: tabId }
+  tabUrls = { ...tabUrls, [id]: tabUrl }
+
   await browser.notifications.create(id, {
     type: 'basic',
     title: author,
@@ -86,10 +86,17 @@ const settingsChanged = async () => {
 
 browser.notifications.onClicked.addListener(async (notificationId: string) => {
   await browser.notifications.clear(notificationId)
-  const tabId = tabIds[notificationId]
-  await browser.tabs.sendMessage(tabId, {
-    id: 'notificationClicked',
-  })
+  const tabUrl = tabUrls[notificationId]
+  const tabs = await browser.tabs.query({ url: tabUrl })
+  if (tabs.length) {
+    const tab = tabs[0]
+    await browser.tabs.update(tab.id, { active: true })
+    if (tab.windowId) {
+      await browser.windows.update(tab.windowId, { focused: true })
+    }
+  } else {
+    await browser.tabs.create({ url: tabUrl, active: true })
+  }
 })
 
 browser.runtime.onMessage.addListener(async (message, sender) => {
@@ -102,7 +109,7 @@ browser.runtime.onMessage.addListener(async (message, sender) => {
       tab?.id && (await menuButtonClicked(tab.id))
       break
     case 'notifyMessage':
-      tab?.id && (await notifyMessage(tab.id, data))
+      await notifyMessage(data)
       break
     case 'settingsChanged':
       await settingsChanged()

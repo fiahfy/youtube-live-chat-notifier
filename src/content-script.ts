@@ -43,6 +43,10 @@ const getImageSourceAsync = (
   })
 }
 
+const getResizedImageUrl = (url: string) => {
+  return url.replace(/(\/s)\d+/, '$1128')
+}
+
 const getDataUrlFromImg = (img: HTMLImageElement) => {
   const canvas = document.createElement('canvas')
   canvas.width = img.width
@@ -50,15 +54,18 @@ const getDataUrlFromImg = (img: HTMLImageElement) => {
 
   const ctx = canvas.getContext('2d')
   if (!ctx) {
-    return null
+    return undefined
   }
   ctx.drawImage(img, 0, 0)
 
   return canvas.toDataURL('image/jpeg')
 }
 
-const getDataUrl = (url: string) => {
+const getDataUrl = (url: string): Promise<string | undefined> => {
   return new Promise((resolve) => {
+    if (!url) {
+      return resolve(url)
+    }
     const img = new Image()
     img.crossOrigin = 'anonymous'
     img.src = url
@@ -125,6 +132,10 @@ const notify = async (element: HTMLElement) => {
     return
   }
 
+  if (element.classList.contains('ylcf-deleted-message')) {
+    return
+  }
+
   if (element.tagName.toLowerCase() !== 'yt-live-chat-text-message-renderer') {
     return
   }
@@ -144,7 +155,9 @@ const notify = async (element: HTMLElement) => {
   avatorImage && avatorImage.setAttribute('crossOrigin', 'anonymous')
   const avatarUrl =
     (avatorImage && (await getImageSourceAsync(avatorImage))) ?? ''
-  const url = await getDataUrl(avatarUrl)
+  const resizedUrl = getResizedImageUrl(avatarUrl)
+  const url = await getDataUrl(resizedUrl)
+  const tabUrl = parent.location.href
 
   browser.runtime.sendMessage({
     id: 'notifyMessage',
@@ -152,6 +165,7 @@ const notify = async (element: HTMLElement) => {
       message,
       author,
       avatarUrl: url,
+      tabUrl,
     },
   })
 }
@@ -187,9 +201,6 @@ browser.runtime.onMessage.addListener((message) => {
       break
     case 'settingsChanged':
       settings = data.settings
-      break
-    case 'notificationClicked':
-      window.parent.focus()
       break
   }
 })

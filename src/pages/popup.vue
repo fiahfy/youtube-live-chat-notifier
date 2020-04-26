@@ -34,6 +34,12 @@
             />
           </div>
         </div>
+        <div class="mb-3">
+          Filter Notifications by
+          <a href="#" @click="onClick">
+            Chat Filter for YouTube Live
+          </a>
+        </div>
         <v-btn depressed small block @click="onClickReset">
           Reset
         </v-btn>
@@ -57,6 +63,11 @@ export default class Popup extends Vue {
     })
   }
 
+  onClick() {
+    window.open(
+      'https://chrome.google.com/webstore/detail/chat-filter-for-youtube-l/jalcplhakmckbmlbidmbmpaegcpbejog'
+    )
+  }
   onClickReset() {
     settingsStore.reset()
   }
