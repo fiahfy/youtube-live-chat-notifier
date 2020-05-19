@@ -142,7 +142,7 @@ const notify = async (element: HTMLElement) => {
 
   const authorType = (element.getAttribute('author-type') ||
     'guest') as AuthorType
-  if (!settings.enabledTypes.includes(authorType)) {
+  if (!settings.types[authorType]) {
     return
   }
 
