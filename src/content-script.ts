@@ -5,6 +5,9 @@ import notifications from '~/assets/notifications.svg'
 const ClassName = {
   menuButton: 'ylcn-menu-button',
   activeMenuButton: 'ylcn-active-menu-button',
+  filterActivated: 'ylcfr-active',
+  filteredMessage: 'ylcfr-filtered-message',
+  deletedMessage: 'ylcfr-deleted-message',
 }
 
 let enabled: boolean
@@ -120,6 +123,27 @@ const addMenuButton = () => {
   updateMenuButton()
 }
 
+const validateDeletedMessage = async (element: HTMLElement) => {
+  const active = document.documentElement.classList.contains(
+    ClassName.filterActivated
+  )
+  if (!active) {
+    return false
+  }
+  const deleted = await new Promise<boolean>((resolve) => {
+    const expireTime = Date.now() + 1000
+    const timer = setInterval(() => {
+      const filtered = element.classList.contains(ClassName.filteredMessage)
+      if (filtered || Date.now() > expireTime) {
+        clearInterval(timer)
+        const deleted = element.classList.contains(ClassName.deletedMessage)
+        resolve(deleted)
+      }
+    }, 10)
+  })
+  return deleted
+}
+
 const notify = async (element: HTMLElement) => {
   if (!enabled) {
     return
@@ -132,7 +156,8 @@ const notify = async (element: HTMLElement) => {
     return
   }
 
-  if (element.classList.contains('ylcf-deleted-message')) {
+  const deleted = await validateDeletedMessage(element)
+  if (deleted) {
     return
   }
 
