@@ -36,13 +36,9 @@
         </div>
         <div class="mb-3">
           Filter Notifications by
-          <a href="#" @click="handleClick">
-            Chat Filter for YouTube Live
-          </a>
+          <a href="#" @click="handleClick">Chat Filter for YouTube Live</a>
         </div>
-        <v-btn depressed small block @click="handleClickReset">
-          Reset
-        </v-btn>
+        <v-btn depressed small block @click="handleClickReset">Reset</v-btn>
       </v-container>
     </v-main>
   </v-app>
