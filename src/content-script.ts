@@ -1,5 +1,5 @@
 import { browser } from 'webextension-polyfill-ts'
-import Settings, { AuthorType } from '~/models/settings'
+import { AuthorType, Settings } from '~/models'
 import notifications from '~/assets/notifications.svg'
 
 const ClassName = {
@@ -150,7 +150,7 @@ const notify = async (element: HTMLElement) => {
   }
 
   const video = parent.document.querySelector(
-    'video.html5-main-video'
+    'ytd-watch-flexy video.html5-main-video'
   ) as HTMLVideoElement | null
   if (!video || video.paused) {
     return
@@ -181,16 +181,18 @@ const notify = async (element: HTMLElement) => {
   const avatarUrl =
     (avatorImage && (await getImageSourceAsync(avatorImage))) ?? ''
   const resizedUrl = getResizedImageUrl(avatarUrl)
-  const url = await getDataUrl(resizedUrl)
-  const tabUrl = parent.location.href
+  const dataUrl = await getDataUrl(resizedUrl)
+  const url = parent.location.href
+  const time = Math.floor(video.currentTime)
 
   browser.runtime.sendMessage({
     id: 'notifyMessage',
     data: {
       message,
       author,
-      avatarUrl: url,
-      tabUrl,
+      avatarUrl: dataUrl,
+      url,
+      time,
     },
   })
 }

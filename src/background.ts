@@ -6,7 +6,9 @@ import iconOn from '~/assets/icon-on.png'
 
 let initialEnabled = true
 let enabledStates: { [tabId: number]: boolean } = {}
-let tabUrls: { [notificationId: string]: string } = {}
+let notificationData: {
+  [notificationId: string]: { url: string; time: number }
+} = {}
 
 const getSettings = async () => {
   const store = await readyStore()
@@ -50,15 +52,17 @@ const notifyMessage = async ({
   message,
   author,
   avatarUrl,
-  tabUrl,
+  url,
+  time,
 }: {
   message: string
   author: string
   avatarUrl: string
-  tabUrl: string
+  url: string
+  time: number
 }) => {
   const id = nanoid()
-  tabUrls = { ...tabUrls, [id]: tabUrl }
+  notificationData = { ...notificationData, [id]: { url, time } }
 
   await browser.notifications.create(id, {
     type: 'basic',
@@ -83,18 +87,20 @@ const settingsChanged = async () => {
 }
 
 browser.notifications.onClicked.addListener(async (notificationId: string) => {
-  await browser.notifications.clear(notificationId)
-  const tabUrl = tabUrls[notificationId]
-  const tabs = await browser.tabs.query({ url: tabUrl })
-  if (tabs.length) {
-    const tab = tabs[0]
-    await browser.tabs.update(tab.id, { active: true })
-    if (tab.windowId) {
-      await browser.windows.update(tab.windowId, { focused: true })
+  try {
+    await browser.notifications.clear(notificationId)
+    const { url, time } = notificationData[notificationId]
+    const tabs = await browser.tabs.query({ url })
+    if (tabs.length) {
+      const tab = tabs[0]
+      await browser.tabs.update(tab.id, { active: true })
+      if (tab.windowId) {
+        await browser.windows.update(tab.windowId, { focused: true })
+      }
+    } else {
+      await browser.tabs.create({ url: `${url}&t=${time}`, active: true })
     }
-  } else {
-    await browser.tabs.create({ url: tabUrl, active: true })
-  }
+  } catch (e) {} // eslint-disable-line no-empty
 })
 
 browser.runtime.onMessage.addListener(async (message, sender) => {

@@ -46,7 +46,7 @@
 
 <script lang="ts">
 import { defineComponent, computed } from '@vue/composition-api'
-import { AuthorType, Types } from '~/models/settings'
+import { AuthorType, Types } from '~/models'
 import { settingsStore } from '~/store'
 
 export default defineComponent({
