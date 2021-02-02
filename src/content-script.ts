@@ -47,7 +47,7 @@ const getImageSourceAsync = (
 }
 
 const getResizedImageUrl = (url: string) => {
-  return url.replace(/(\/s)\d+/, '$1128')
+  return url.replace(/(=s)\d+/, '$1128')
 }
 
 const getDataUrlFromImg = (img: HTMLImageElement) => {
@@ -90,8 +90,8 @@ const updateMenuButton = () => {
   }
 }
 
-const addMenuButton = () => {
-  const header = document.querySelector(
+const addMenuButton = async () => {
+  const header = await querySelectorAsync(
     '#chat-messages > yt-live-chat-header-renderer'
   )
   const refIconButton = header && header.querySelector('yt-icon-button')
@@ -198,25 +198,42 @@ const notify = async (element: HTMLElement) => {
 }
 
 const observe = async () => {
-  const items = await querySelectorAsync(
-    '#items.yt-live-chat-item-list-renderer'
-  )
-  if (!items) {
+  let messageObserver: MutationObserver | undefined = undefined
+
+  const observeMessages = async () => {
+    messageObserver?.disconnect()
+
+    const el = await querySelectorAsync(
+      '#items.yt-live-chat-item-list-renderer'
+    )
+    if (!el) {
+      return
+    }
+
+    messageObserver = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        const nodes = Array.from(mutation.addedNodes)
+        nodes.forEach((node: Node) => {
+          if (node instanceof HTMLElement) {
+            notify(node)
+          }
+        })
+      })
+    })
+    messageObserver.observe(el, { childList: true })
+  }
+
+  await observeMessages()
+
+  const el = await querySelectorAsync('#item-list.yt-live-chat-renderer')
+  if (!el) {
     return
   }
 
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      const nodes = Array.from(mutation.addedNodes)
-      nodes.forEach((node: Node) => {
-        if (node instanceof HTMLElement) {
-          notify(node)
-        }
-      })
-    })
+  const observer = new MutationObserver(async () => {
+    await observeMessages()
   })
-
-  observer.observe(items, { childList: true })
+  observer.observe(el, { childList: true })
 }
 
 browser.runtime.onMessage.addListener((message) => {
@@ -236,6 +253,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const data = await browser.runtime.sendMessage({ id: 'contentLoaded' })
   enabled = data.enabled
   settings = data.settings
-  addMenuButton()
+  await addMenuButton()
   await observe()
 })
