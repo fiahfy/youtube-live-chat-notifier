@@ -20,7 +20,7 @@ const querySelectorAsync = (
 ): Promise<Element | null> => {
   return new Promise((resolve) => {
     const expireTime = Date.now() + timeout
-    const timer = setInterval(() => {
+    const timer = window.setInterval(() => {
       const e = document.querySelector(selector)
       if (e || Date.now() > expireTime) {
         clearInterval(timer)
@@ -37,7 +37,7 @@ const getImageSourceAsync = (
 ): Promise<string> => {
   return new Promise((resolve) => {
     const expireTime = Date.now() + timeout
-    const timer = setInterval(() => {
+    const timer = window.setInterval(() => {
       if (img.src || Date.now() > expireTime) {
         clearInterval(timer)
         resolve(img.src)
@@ -132,7 +132,7 @@ const validateDeletedMessage = async (element: HTMLElement) => {
   }
   const deleted = await new Promise<boolean>((resolve) => {
     const expireTime = Date.now() + 1000
-    const timer = setInterval(() => {
+    const timer = window.setInterval(() => {
       const filtered = element.classList.contains(ClassName.filteredMessage)
       if (filtered || Date.now() > expireTime) {
         clearInterval(timer)
