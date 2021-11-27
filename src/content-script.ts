@@ -1,4 +1,4 @@
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 import { AuthorType, Settings } from '~/models'
 import notifications from '~/assets/notifications.svg'
 
