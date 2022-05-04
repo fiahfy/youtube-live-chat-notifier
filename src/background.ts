@@ -1,4 +1,3 @@
-import browser from 'webextension-polyfill'
 import { nanoid } from 'nanoid'
 import { readyStore } from '~/store'
 import iconOff from '~/assets/icon-off.png'
@@ -17,7 +16,7 @@ const getSettings = async () => {
 
 const setIcon = async (tabId: number, enabled: boolean) => {
   const path = enabled ? iconOn : iconOff
-  await browser.pageAction.setIcon({ tabId, path })
+  await chrome.action.setIcon({ tabId, path })
 }
 
 const contentLoaded = async (tabId: number) => {
@@ -25,7 +24,6 @@ const contentLoaded = async (tabId: number) => {
   enabledStates = { ...enabledStates, [tabId]: enabled }
 
   await setIcon(tabId, enabled)
-  await browser.pageAction.show(tabId)
 
   const settings = await getSettings()
 
@@ -42,8 +40,8 @@ const menuButtonClicked = async (tabId: number) => {
 
   await setIcon(tabId, enabled)
 
-  await browser.tabs.sendMessage(tabId, {
-    id: 'enabledChanged',
+  await chrome.tabs.sendMessage(tabId, {
+    type: 'enabled-changed',
     data: { enabled },
   })
 }
@@ -64,7 +62,7 @@ const notifyMessage = async ({
   const id = nanoid()
   notificationData = { ...notificationData, [id]: { url, time } }
 
-  await browser.notifications.create(id, {
+  await chrome.notifications.create(id, {
     type: 'basic',
     title: author,
     iconUrl: avatarUrl ?? iconOff,
@@ -74,49 +72,56 @@ const notifyMessage = async ({
 
 const settingsChanged = async () => {
   const settings = await getSettings()
-  const tabs = await browser.tabs.query({})
+  const tabs = await chrome.tabs.query({})
   for (const tab of tabs) {
     try {
       tab.id &&
-        (await browser.tabs.sendMessage(tab.id, {
-          id: 'settingsChanged',
+        chrome.tabs.sendMessage(tab.id, {
+          type: 'settings-changed',
           data: { settings },
-        }))
+        })
     } catch (e) {} // eslint-disable-line no-empty
   }
 }
 
-browser.notifications.onClicked.addListener(async (notificationId: string) => {
+chrome.notifications.onClicked.addListener(async (notificationId: string) => {
   try {
-    await browser.notifications.clear(notificationId)
+    await chrome.notifications.clear(notificationId)
     const { url, time } = notificationData[notificationId]
-    const tabs = await browser.tabs.query({ url })
+    const tabs = await chrome.tabs.query({ url })
     if (tabs.length) {
       const tab = tabs[0]
-      await browser.tabs.update(tab.id, { active: true })
+      tab.id && (await chrome.tabs.update(tab.id, { active: true }))
       if (tab.windowId) {
-        await browser.windows.update(tab.windowId, { focused: true })
+        await chrome.windows.update(tab.windowId, { focused: true })
       }
     } else {
-      await browser.tabs.create({ url: `${url}&t=${time}`, active: true })
+      await chrome.tabs.create({ url: `${url}&t=${time}`, active: true })
     }
   } catch (e) {} // eslint-disable-line no-empty
 })
 
-browser.runtime.onMessage.addListener(async (message, sender) => {
-  const { id, data } = message
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  const { type, data } = message
   const { tab } = sender
-  switch (id) {
-    case 'contentLoaded':
-      return tab?.id && (await contentLoaded(tab.id))
-    case 'menuButtonClicked':
-      tab?.id && (await menuButtonClicked(tab.id))
-      break
-    case 'notifyMessage':
-      await notifyMessage(data)
-      break
-    case 'settingsChanged':
-      await settingsChanged()
-      break
+  switch (type) {
+    case 'content-loaded':
+      if (tab?.id) {
+        contentLoaded(tab.id).then((data) => sendResponse(data))
+        return true
+      }
+      return
+    case 'menu-button-clicked':
+      if (tab?.id) {
+        menuButtonClicked(tab.id).then(() => sendResponse())
+        return true
+      }
+      return
+    case 'notify-message':
+      notifyMessage(data).then(() => sendResponse())
+      return true
+    case 'settings-changed':
+      settingsChanged().then(() => sendResponse())
+      return true
   }
 })

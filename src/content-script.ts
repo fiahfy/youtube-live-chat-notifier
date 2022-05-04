@@ -1,4 +1,3 @@
-import browser from 'webextension-polyfill'
 import { AuthorType, Settings } from '~/models'
 import notifications from '~/assets/notifications.svg'
 
@@ -17,8 +16,8 @@ const querySelectorAsync = (
   selector: string,
   interval = 100,
   timeout = 1000
-): Promise<Element | null> => {
-  return new Promise((resolve) => {
+) => {
+  return new Promise<Element | null>((resolve) => {
     const expireTime = Date.now() + timeout
     const timer = window.setInterval(() => {
       const e = document.querySelector(selector)
@@ -34,8 +33,8 @@ const getImageSourceAsync = (
   img: HTMLImageElement,
   interval = 100,
   timeout = 1000
-): Promise<string> => {
-  return new Promise((resolve) => {
+) => {
+  return new Promise<string>((resolve) => {
     const expireTime = Date.now() + timeout
     const timer = window.setInterval(() => {
       if (img.src || Date.now() > expireTime) {
@@ -64,8 +63,8 @@ const getDataUrlFromImg = (img: HTMLImageElement) => {
   return canvas.toDataURL('image/jpeg')
 }
 
-const getDataUrl = (url: string): Promise<string | undefined> => {
-  return new Promise((resolve) => {
+const getDataUrl = (url: string) => {
+  return new Promise<string | undefined>((resolve) => {
     if (!url) {
       return resolve(url)
     }
@@ -110,8 +109,8 @@ const addMenuButton = async () => {
     'yt-live-chat-header-renderer'
   )
   iconButton.title = 'Notify Messages'
-  iconButton.onclick = () => {
-    browser.runtime.sendMessage({ id: 'menuButtonClicked' })
+  iconButton.onclick = async () => {
+    await chrome.runtime.sendMessage({ type: 'menu-button-clicked' })
   }
   iconButton.append(icon)
 
@@ -185,8 +184,8 @@ const notify = async (element: HTMLElement) => {
   const url = parent.location.href
   const time = Math.floor(video.currentTime)
 
-  browser.runtime.sendMessage({
-    id: 'notifyMessage',
+  await chrome.runtime.sendMessage({
+    type: 'notify-message',
     data: {
       message,
       author,
@@ -236,21 +235,21 @@ const observe = async () => {
   observer.observe(el, { childList: true })
 }
 
-browser.runtime.onMessage.addListener((message) => {
-  const { id, data } = message
-  switch (id) {
-    case 'enabledChanged':
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  const { type, data } = message
+  switch (type) {
+    case 'enabled-changed':
       enabled = data.enabled
       updateMenuButton()
-      break
-    case 'settingsChanged':
+      return sendResponse()
+    case 'settings-changed':
       settings = data.settings
-      break
+      return sendResponse()
   }
 })
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const data = await browser.runtime.sendMessage({ id: 'contentLoaded' })
+  const data = await chrome.runtime.sendMessage({ type: 'content-loaded' })
   enabled = data.enabled
   settings = data.settings
   await addMenuButton()
