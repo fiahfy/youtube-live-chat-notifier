@@ -1,4 +1,5 @@
 import { nanoid } from 'nanoid'
+import { Settings } from '~/models'
 import { readyStore } from '~/store'
 import iconOff from '~/assets/icon-off.png'
 import iconOn from '~/assets/icon-on.png'
@@ -70,9 +71,10 @@ const notifyMessage = async ({
   })
 }
 
-const settingsChanged = async () => {
-  const settings = await getSettings()
-  const tabs = await chrome.tabs.query({})
+const settingsChanged = async (settings: Settings) => {
+  const tabs = await chrome.tabs.query({
+    url: 'https://www.youtube.com/*',
+  })
   for (const tab of tabs) {
     try {
       tab.id &&
@@ -121,7 +123,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       notifyMessage(data).then(() => sendResponse())
       return true
     case 'settings-changed':
-      settingsChanged().then(() => sendResponse())
+      settingsChanged(data.settings).then(() => sendResponse())
       return true
   }
 })

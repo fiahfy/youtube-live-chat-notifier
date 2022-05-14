@@ -1,4 +1,4 @@
-import { AuthorType, Settings } from '~/models'
+import { Settings } from '~/models'
 import notifications from '~/assets/notifications.svg'
 
 const ClassName = {
@@ -165,7 +165,7 @@ const notify = async (element: HTMLElement) => {
   }
 
   const authorType = (element.getAttribute('author-type') ||
-    'guest') as AuthorType
+    'guest') as keyof Settings['types']
   if (!settings.types[authorType]) {
     return
   }

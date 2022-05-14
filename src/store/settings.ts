@@ -1,7 +1,10 @@
-import { Module, VuexModule, Mutation } from 'vuex-module-decorators'
-import { Settings, Types } from '~/models'
+import { Module } from 'vuex'
+import { Settings } from '~/models'
+import { State as RootState } from '~/store'
 
-const initialState: Settings = {
+export type State = Settings
+
+const initialState: State = {
   types: {
     guest: false,
     member: false,
@@ -10,18 +13,15 @@ const initialState: Settings = {
   },
 }
 
-@Module({ name: 'settings' })
-export default class SettingsModule extends VuexModule {
-  types = initialState.types
-
-  @Mutation
-  setTypes({ types }: { types: Types }) {
-    this.types = types
-  }
-  @Mutation
-  reset() {
-    for (const [k, v] of Object.entries(initialState)) {
-      ;(this as any)[k] = v // eslint-disable-line @typescript-eslint/no-explicit-any
-    }
-  }
+export const module: Module<State, RootState> = {
+  namespaced: true,
+  state: () => ({ types: { ...initialState.types } }),
+  mutations: {
+    setTypes(state, { types }: { types: Settings['types'] }) {
+      state.types = types
+    },
+    reset(state) {
+      state.types = { ...initialState.types }
+    },
+  },
 }

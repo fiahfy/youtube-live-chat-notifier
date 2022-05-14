@@ -1,1 +1,3 @@
-export * from '~/models/settings'
+export type Settings = {
+  types: { [authorType in 'guest' | 'member' | 'moderator' | 'owner']: boolean }
+}
