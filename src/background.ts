@@ -1,6 +1,7 @@
 import { nanoid } from 'nanoid'
 import { Settings } from '~/models'
-import { readyStore } from '~/store'
+import { persistConfig } from '~/store'
+import { initialState as initialSettings } from '~/store/settings'
 import iconOff from '~/assets/icon-off.png'
 import iconOn from '~/assets/icon-on.png'
 
@@ -11,8 +12,14 @@ let notificationData: {
 } = {}
 
 const getSettings = async () => {
-  const store = await readyStore()
-  return JSON.parse(JSON.stringify(store.state.settings))
+  try {
+    const key = `persist:${persistConfig.key}`
+    const json = (await chrome.storage.local.get(key))[key]
+    const rootState = JSON.parse(json)
+    return JSON.parse(rootState.settings)
+  } catch (e) {
+    return initialSettings
+  }
 }
 
 const setIcon = async (tabId: number, enabled: boolean) => {
