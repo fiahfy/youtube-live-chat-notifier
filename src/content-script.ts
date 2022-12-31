@@ -15,7 +15,7 @@ let settings: Settings
 const querySelectorAsync = (
   selector: string,
   interval = 100,
-  timeout = 1000
+  timeout = 10000
 ) => {
   return new Promise<Element | null>((resolve) => {
     const expireTime = Date.now() + timeout
@@ -32,7 +32,7 @@ const querySelectorAsync = (
 const getImageSourceAsync = (
   img: HTMLImageElement,
   interval = 100,
-  timeout = 1000
+  timeout = 10000
 ) => {
   return new Promise<string>((resolve) => {
     const expireTime = Date.now() + timeout
