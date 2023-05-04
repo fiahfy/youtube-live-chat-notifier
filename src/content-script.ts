@@ -1,5 +1,6 @@
 import { Settings } from '~/models'
-import notifications from '~/assets/notifications.svg'
+import notifications from '~/assets/notifications.svg?raw'
+import './content-script.css'
 
 const ClassName = {
   menuButton: 'ylcn-menu-button',
@@ -93,17 +94,29 @@ const addMenuButton = async () => {
   const header = await querySelectorAsync(
     '#chat-messages > yt-live-chat-header-renderer'
   )
-  const refIconButton = header && header.querySelector('yt-icon-button')
+  const refIconButton = header && header.querySelector('yt-live-chat-button')
   if (!header || !refIconButton) {
     return
   }
 
   const icon = document.createElement('yt-icon')
-  icon.classList.add('yt-live-chat-header-renderer', 'style-scope')
+  icon.classList.add('style-scope', 'yt-button-renderer')
+
+  const button = document.createElement('button')
+  button.id = 'button'
+  button.classList.add('style-scope', 'yt-icon-button')
 
   const iconButton = document.createElement('yt-icon-button')
-  iconButton.id = 'overflow'
-  iconButton.classList.add(
+  iconButton.id = 'button'
+  iconButton.classList.add('style-scope', 'yt-button-renderer')
+
+  const a = document.createElement('a')
+  a.tabIndex = -1
+  a.classList.add('yt-simple-endpoint', 'style-scope', 'yt-button-renderer')
+
+  const liveChatButton = document.createElement('yt-live-chat-button')
+  liveChatButton.id = 'live-chat-header-context-menu'
+  liveChatButton.classList.add(
     ClassName.menuButton,
     'style-scope',
     'yt-live-chat-header-renderer'
@@ -112,12 +125,20 @@ const addMenuButton = async () => {
   iconButton.onclick = async () => {
     await chrome.runtime.sendMessage({ type: 'menu-button-clicked' })
   }
-  iconButton.append(icon)
 
-  header.insertBefore(iconButton, refIconButton)
+  header.insertBefore(liveChatButton, refIconButton)
+
+  liveChatButton.append(a)
+  a.append(iconButton)
+  iconButton.append(button)
+  button.append(icon)
 
   // insert svg after wrapper button appended
   icon.innerHTML = notifications
+
+  // remove unnecessary elements
+  liveChatButton.querySelector('yt-button-renderer')?.remove()
+  iconButton.querySelector('button')?.remove()
 
   updateMenuButton()
 }
@@ -248,8 +269,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   }
 })
 
-document.addEventListener('DOMContentLoaded', async () => {
-  const data = await chrome.runtime.sendMessage({ type: 'content-loaded' })
+chrome.runtime.sendMessage({ type: 'content-loaded' }).then(async (data) => {
   enabled = data.enabled
   settings = data.settings
   await addMenuButton()
