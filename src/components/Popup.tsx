@@ -24,7 +24,7 @@ const App = () => {
 
   const handleClickLink = () =>
     window.open(
-      'https://chrome.google.com/webstore/detail/chat-filter-for-youtube-l/jalcplhakmckbmlbidmbmpaegcpbejog'
+      'https://chrome.google.com/webstore/detail/chat-filter-for-youtube-l/jalcplhakmckbmlbidmbmpaegcpbejog',
     )
 
   const handleClickReset = () => dispatch(reset())

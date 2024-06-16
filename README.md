@@ -1,6 +1,6 @@
 # Chat Notifier for YouTube Live
 
-![badge](https://github.com/fiahfy/youtube-live-chat-notifier/workflows/Web%20Extension/badge.svg)
+![badge](https://github.com/fiahfy/youtube-live-chat-notifier/workflows/Create%20Release/badge.svg)
 
 > Chrome Extension for Notifying Chat Messages on YouTube Live.
 

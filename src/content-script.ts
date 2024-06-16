@@ -16,7 +16,7 @@ let settings: Settings
 const querySelectorAsync = (
   selector: string,
   interval = 100,
-  timeout = 10000
+  timeout = 10000,
 ) => {
   return new Promise<Element | null>((resolve) => {
     const expireTime = Date.now() + timeout
@@ -33,7 +33,7 @@ const querySelectorAsync = (
 const getImageSourceAsync = (
   img: HTMLImageElement,
   interval = 100,
-  timeout = 10000
+  timeout = 10000,
 ) => {
   return new Promise<string>((resolve) => {
     const expireTime = Date.now() + timeout
@@ -92,7 +92,7 @@ const updateMenuButton = () => {
 
 const addMenuButton = async () => {
   const header = await querySelectorAsync(
-    '#chat-messages > yt-live-chat-header-renderer'
+    '#chat-messages > yt-live-chat-header-renderer',
   )
   const refIconButton = header && header.querySelector('yt-live-chat-button')
   if (!header || !refIconButton) {
@@ -119,7 +119,7 @@ const addMenuButton = async () => {
   liveChatButton.classList.add(
     ClassName.menuButton,
     'style-scope',
-    'yt-live-chat-header-renderer'
+    'yt-live-chat-header-renderer',
   )
   iconButton.title = 'Notify Messages'
   iconButton.onclick = async () => {
@@ -145,7 +145,7 @@ const addMenuButton = async () => {
 
 const validateDeletedMessage = async (element: HTMLElement) => {
   const active = document.documentElement.classList.contains(
-    ClassName.filterActivated
+    ClassName.filterActivated,
   )
   if (!active) {
     return false
@@ -170,7 +170,7 @@ const notify = async (element: HTMLElement) => {
   }
 
   const video = parent.document.querySelector(
-    'ytd-watch-flexy video.html5-main-video'
+    'ytd-watch-flexy video.html5-main-video',
   ) as HTMLVideoElement | null
   if (!video || video.paused) {
     return
@@ -224,7 +224,7 @@ const observe = async () => {
     messageObserver?.disconnect()
 
     const el = await querySelectorAsync(
-      '#items.yt-live-chat-item-list-renderer'
+      '#items.yt-live-chat-item-list-renderer',
     )
     if (!el) {
       return

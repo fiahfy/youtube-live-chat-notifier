@@ -34,5 +34,5 @@ export const selectSettings = (state: AppState) => state.settings
 
 export const selectTypes = createSelector(
   selectSettings,
-  (settings) => settings.types
+  (settings) => settings.types,
 )
