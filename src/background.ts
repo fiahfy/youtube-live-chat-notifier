@@ -1,9 +1,9 @@
 import { nanoid } from 'nanoid'
-import { Settings } from '~/models'
+import type { Settings } from '~/models'
 import { persistConfig } from '~/store'
 import { initialState as initialSettings } from '~/store/settings'
-import icon from '/icon.png'
 import iconOn from '/icon-on.png'
+import icon from '/icon.png'
 
 let initialEnabled = true
 let enabledStates: { [tabId: number]: boolean } = {}

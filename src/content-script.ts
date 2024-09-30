@@ -1,5 +1,5 @@
-import { Settings } from '~/models'
 import notifications from '~/assets/notifications.svg?raw'
+import type { Settings } from '~/models'
 import './content-script.css'
 
 const ClassName = {
@@ -94,7 +94,7 @@ const addMenuButton = async () => {
   const header = await querySelectorAsync(
     '#chat-messages > yt-live-chat-header-renderer',
   )
-  const refIconButton = header && header.querySelector('yt-live-chat-button')
+  const refIconButton = header?.querySelector('yt-live-chat-button')
   if (!header || !refIconButton) {
     return
   }
@@ -197,7 +197,7 @@ const notify = async (element: HTMLElement) => {
     .replace(/<[^>]*>/g, '')
   const author = element.querySelector('#author-name')?.textContent ?? ''
   const avatorImage = element.querySelector('#img') as HTMLImageElement | null
-  avatorImage && avatorImage.setAttribute('crossOrigin', 'anonymous')
+  avatorImage?.setAttribute('crossOrigin', 'anonymous')
   const avatarUrl =
     (avatorImage && (await getImageSourceAsync(avatorImage))) ?? ''
   const resizedUrl = getResizedImageUrl(avatarUrl)
@@ -231,14 +231,14 @@ const observe = async () => {
     }
 
     messageObserver = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
+      for (const mutation of mutations) {
         const nodes = Array.from(mutation.addedNodes)
-        nodes.forEach((node: Node) => {
+        for (const node of nodes) {
           if (node instanceof HTMLElement) {
             notify(node)
           }
-        })
-      })
+        }
+      }
     })
     messageObserver.observe(el, { childList: true })
   }

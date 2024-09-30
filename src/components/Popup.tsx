@@ -8,7 +8,7 @@ import {
   Switch,
   Typography,
 } from '@mui/material'
-import { ChangeEvent } from 'react'
+import type { ChangeEvent } from 'react'
 import { StoreProvider } from '~/contexts/StoreContext'
 import { useAppDispatch, useAppSelector } from '~/store'
 import { reset, selectTypes, setTypes } from '~/store/settings'
@@ -75,6 +75,7 @@ const App = () => {
       </FormGroup>
       <Typography paragraph sx={{ m: 1 }} variant="caption">
         Filter Notifications by&nbsp;
+        {/* biome-ignore lint/a11y/useValidAnchor: <explanation> */}
         <a href="#" onClick={handleClickLink}>
           Chat Filter for YouTube Live
         </a>
